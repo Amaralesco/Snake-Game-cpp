@@ -1,5 +1,6 @@
 #include<iostream>
 #include <conio.h>
+#include <windows.h>
 using namespace std;
 bool gameOver;
 int score;
@@ -16,7 +17,9 @@ int playerY;
 int fruitX;
 int fruitY;
 
-
+// Tail
+int tailX[100],tailY[100];
+int nTail;
 
 //We need enumeration so player is not required to keep pressing the direction key
 enum eDirection {STOP =0, LEFT, RIGHT,UP,DOWN};
@@ -24,6 +27,9 @@ eDirection dir;
 
 
 void Setup(){
+
+    system("cls");
+
     gameOver = false;
     dir = STOP;
     score = 0;
@@ -40,7 +46,9 @@ void Setup(){
 
 void Draw(){
 
-    system("cls"); // clear the screen
+    //system("cls"); // clear the screen
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0,0});
+    
     for (int i = 0; i < width+1; i++){
         cout << "#";
     }
@@ -59,7 +67,18 @@ void Draw(){
                 cout << "F";
             }
             else{
-                cout << " ";
+                bool print = false;
+
+                for (int k = 0; k<nTail; k++){
+                    if (tailX[k] == j && tailY[k]== i){
+                        print = true;
+                        cout << "o";
+                    }
+                    
+                }
+                if(!print){
+                    cout << " ";
+                }
             }
 
             
@@ -115,6 +134,23 @@ void Input(){
 
 void Logic(){
 
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prev2X, prev2Y;
+
+    tailX[0] = playerX;
+    tailY[0] = playerY;
+    for(int i = 1;i < nTail; i++){
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
     switch (dir)
     {
     case LEFT:
@@ -139,10 +175,15 @@ void Logic(){
     if(playerX > width || playerX <0 || playerY > height || playerY < 0){
         gameOver = true;
     }
+    for (int i = 0; i < nTail; i++){
+        if (tailX[i] == playerX && tailY[i]==playerY){
+            gameOver = true;
+        }
+    }
 
     if ( playerX == fruitX && playerY == fruitY){
         score += 10;
-
+        nTail++;
         //Spawn new fruit
         fruitX = rand() % width; 
         fruitY = rand() % height;   
@@ -157,7 +198,7 @@ int main(){
         Input();
         Logic();
         //sleep(10);
-        _sleep(30);
+        Sleep(50);
     }
 
     return 0;   
